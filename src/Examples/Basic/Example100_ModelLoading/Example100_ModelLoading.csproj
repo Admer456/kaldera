@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example100_ModelLoading</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/model_loading.slang -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/model_loading_ir -target spirv -o $(ProjectDir)Shaders/model_loading.spv -reflection-json $(ProjectDir)Shaders/model_loading.spv.json"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/screen.slang        -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/screen_ir -target spirv -o $(ProjectDir)Shaders/screen.spv -reflection-json $(ProjectDir)Shaders/screen.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/model_loading.spv $(OutDir)model_loading.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/model_loading.spv.json $(OutDir)model_loading.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/screen.spv $(OutDir)screen.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/screen.spv.json $(OutDir)screen.spv.json"/>
+    </Target>
+
+</Project>

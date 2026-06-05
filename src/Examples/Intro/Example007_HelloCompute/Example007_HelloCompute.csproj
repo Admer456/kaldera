@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example007_HelloCompute</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_dynamic.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_dynamic.spv -reflection-json $(ProjectDir)Shaders/hello_dynamic.spv.json"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_dynamic_comp.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_dynamic_comp.spv -reflection-json $(ProjectDir)Shaders/hello_dynamic_comp.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/hello_dynamic.spv $(OutDir)hello_dynamic.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_dynamic.spv.json $(OutDir)hello_dynamic.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_dynamic_comp.spv $(OutDir)hello_dynamic_comp.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_dynamic_comp.spv.json $(OutDir)hello_dynamic_comp.spv.json"/>
+    </Target>
+
+</Project>

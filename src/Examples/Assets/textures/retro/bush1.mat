@@ -1,0 +1,6 @@
+
+diffuseMap textures/retro/bush1.png
+
+alphaTest
+alphaToCoverage
+twoSided

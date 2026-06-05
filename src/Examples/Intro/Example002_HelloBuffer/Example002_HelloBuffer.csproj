@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example002_HelloBuffer</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_buffer.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_buffer.spv -reflection-json $(ProjectDir)Shaders/hello_buffer.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/hello_buffer.spv $(OutDir)hello_buffer.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_buffer.spv.json $(OutDir)hello_buffer.spv.json"/>
+    </Target>
+
+</Project>

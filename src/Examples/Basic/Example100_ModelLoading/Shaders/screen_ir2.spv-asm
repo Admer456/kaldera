@@ -1,0 +1,107 @@
+; SPIR-V
+; Version: 1.5
+; Generator: Khronos Slang Compiler; 0
+; Bound: 107
+; Schema: 0
+OpCapability DrawParameters
+OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint Vertex %VertexMain "VertexMain" %gl_Position %entryPointParam_VertexMain_Uv %gl_VertexIndex %32
+OpEntryPoint Fragment %PixelMain "PixelMain" %Framebuffer %Sampler %entryPointParam_PixelMain %Uv
+OpExecutionMode %PixelMain OriginUpperLeft
+
+; Debug Information
+OpSource Slang 1
+OpName %BuiltinCoordinates "BuiltinCoordinates"     ; id %28
+OpName %pos "pos"                                   ; id %38
+OpName %entryPointParam_VertexMain_Uv "entryPointParam_VertexMain.Uv"   ; id %56
+OpName %VertexMain "VertexMain"                                         ; id %2
+OpName %Uv "Uv"                                                         ; id %65
+OpName %Framebuffer "Framebuffer"                                       ; id %73
+OpName %Sampler "Sampler"                                               ; id %77
+OpName %sampledImage "sampledImage"                                     ; id %80
+OpName %sampled "sampled"                                               ; id %81
+OpName %entryPointParam_PixelMain "entryPointParam_PixelMain"           ; id %83
+OpName %PixelMain "PixelMain"                                           ; id %59
+
+; Annotations
+OpDecorate %32 BuiltIn BaseVertex
+OpDecorate %gl_VertexIndex BuiltIn VertexIndex
+OpDecorate %gl_Position BuiltIn Position
+OpDecorate %entryPointParam_VertexMain_Uv Location 0
+OpDecorate %Uv Location 0
+OpDecorate %Framebuffer Binding 0
+OpDecorate %Framebuffer DescriptorSet 0
+OpDecorate %Sampler Binding 1
+OpDecorate %Sampler DescriptorSet 0
+OpDecorate %entryPointParam_PixelMain Location 0
+
+; Types, variables and constants
+%void = OpTypeVoid
+%3 = OpTypeFunction %void
+%float = OpTypeFloat 32
+%v4float = OpTypeVector %float 4
+%v2float = OpTypeVector %float 2
+%int = OpTypeInt 32 1
+%int_3 = OpConstant %int 3
+%_arr_v2float_int_3 = OpTypeArray %v2float %int_3
+%float_0 = OpConstant %float 0
+%float_3 = OpConstant %float 3
+%19 = OpConstantComposite %v2float %float_0 %float_3
+%float_n1 = OpConstant %float -1
+%22 = OpConstantComposite %v2float %float_3 %float_n1
+%float_n3 = OpConstant %float -3
+%24 = OpConstantComposite %v2float %float_n3 %float_n1
+%_ptr_Input_int = OpTypePointer Input %int
+%float_1 = OpConstant %float 1
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+%float_0_5 = OpConstant %float 0.5
+%70 = OpTypeImage %float 2D 2 0 0 1 Unknown
+%_ptr_UniformConstant_70 = OpTypePointer UniformConstant %70
+%74 = OpTypeSampler
+%_ptr_UniformConstant_74 = OpTypePointer UniformConstant %74
+%79 = OpTypeSampledImage %70
+%32 = OpVariable %_ptr_Input_int Input              ; BuiltIn BaseVertex
+%gl_VertexIndex = OpVariable %_ptr_Input_int Input  ; BuiltIn VertexIndex
+%gl_Position = OpVariable %_ptr_Output_v4float Output   ; BuiltIn Position
+%entryPointParam_VertexMain_Uv = OpVariable %_ptr_Output_v2float Output     ; Location 0
+%Uv = OpVariable %_ptr_Input_v2float Input                                  ; Location 0
+%Framebuffer = OpVariable %_ptr_UniformConstant_70 UniformConstant          ; Binding 0, DescriptorSet 0
+%Sampler = OpVariable %_ptr_UniformConstant_74 UniformConstant              ; Binding 1, DescriptorSet 0
+%entryPointParam_PixelMain = OpVariable %_ptr_Output_v4float Output         ; Location 0
+%_ptr_Function__arr_v2float_int_3 = OpTypePointer Function %_arr_v2float_int_3
+%106 = OpConstantComposite %v2float %float_1 %float_1
+
+; Function VertexMain
+%VertexMain = OpFunction %void None %3
+%4 = OpLabel
+%BuiltinCoordinates = OpVariable %_ptr_Function__arr_v2float_int_3 Function
+%100 = OpCompositeConstruct %_arr_v2float_int_3 %19 %22 %24
+OpStore %BuiltinCoordinates %100
+%30 = OpLoad %int %32
+%33 = OpLoad %int %gl_VertexIndex
+%35 = OpISub %int %33 %30
+%37 = OpAccessChain %_ptr_Function_v2float %BuiltinCoordinates %35
+%pos = OpLoad %v2float %37
+%42 = OpCompositeConstruct %v4float %pos %float_0 %float_1
+OpStore %gl_Position %42
+OpStore %entryPointParam_VertexMain_Uv %pos
+OpReturn
+OpFunctionEnd
+
+; Function PixelMain
+%PixelMain = OpFunction %void None %3
+%60 = OpLabel
+%63 = OpLoad %v2float %Uv
+%67 = OpFAdd %v2float %63 %106
+%68 = OpVectorTimesScalar %v2float %67 %float_0_5
+%71 = OpLoad %70 %Framebuffer
+%75 = OpLoad %74 %Sampler
+%sampledImage = OpSampledImage %79 %71 %75
+%sampled = OpImageSampleImplicitLod %v4float %sampledImage %68 None
+OpStore %entryPointParam_PixelMain %sampled
+OpReturn
+OpFunctionEnd

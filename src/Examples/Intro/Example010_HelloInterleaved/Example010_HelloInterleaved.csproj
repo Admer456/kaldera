@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example010_HelloInterleaved</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_interleaved.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_interleaved.spv -reflection-json $(ProjectDir)Shaders/hello_interleaved.spv.json"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/screen.slang -I ./ -target spirv -o $(ProjectDir)Shaders/screen.spv -reflection-json $(ProjectDir)Shaders/screen.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/hello_interleaved.spv $(OutDir)hello_interleaved.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_interleaved.spv.json $(OutDir)hello_interleaved.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/screen.spv $(OutDir)screen.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/screen.spv.json $(OutDir)screen.spv.json"/>
+    </Target>
+
+</Project>

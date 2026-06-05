@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example004_HelloTexture</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_texture.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_texture.spv -reflection-json $(ProjectDir)Shaders/hello_texture.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/hello_texture.spv $(OutDir)hello_texture.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_texture.spv.json $(OutDir)hello_texture.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Assets/hello_texture.png $(OutDir)hello_texture.png"/>
+    </Target>
+
+</Project>

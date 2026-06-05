@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example102_Multithreading</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BepuUtilities" Version="2.5.0-beta.29" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/transparency.slang -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/transparency_ir                     -target spirv -o $(ProjectDir)Shaders/transparency.spv                     -reflection-json $(ProjectDir)Shaders/transparency.spv.json"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/transparency.slang -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/transparency_alphatest_ir           -target spirv -o $(ProjectDir)Shaders/transparency_alphatest.spv           -reflection-json $(ProjectDir)Shaders/transparency_alphatest.spv.json -DALPHA_TEST"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/transparency.slang -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/transparency_instanced_ir           -target spirv -o $(ProjectDir)Shaders/transparency_instanced.spv           -reflection-json $(ProjectDir)Shaders/transparency_instanced.spv.json -DINSTANCED"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/transparency.slang -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/transparency_instanced_alphatest_ir -target spirv -o $(ProjectDir)Shaders/transparency_instanced_alphatest.spv -reflection-json $(ProjectDir)Shaders/transparency_instanced_alphatest.spv.json -DINSTANCED -DALPHA_TEST"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/screen.slang       -I ./ -capability spirv_1_4 -dump-intermediates -dump-intermediate-prefix Shaders/screen_ir                           -target spirv -o $(ProjectDir)Shaders/screen.spv                           -reflection-json $(ProjectDir)Shaders/screen.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/transparency.spv                $(OutDir)transparency.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency.spv.json           $(OutDir)transparency.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency_alphatest.spv      $(OutDir)transparency_alphatest.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency_alphatest.spv.json $(OutDir)transparency_alphatest.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency_instanced.spv                $(OutDir)transparency_instanced.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency_instanced.spv.json           $(OutDir)transparency_instanced.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency_instanced_alphatest.spv      $(OutDir)transparency_instanced_alphatest.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/transparency_instanced_alphatest.spv.json $(OutDir)transparency_instanced_alphatest.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/screen.spv                      $(OutDir)screen.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/screen.spv.json                 $(OutDir)screen.spv.json"/>
+    </Target>
+
+</Project>

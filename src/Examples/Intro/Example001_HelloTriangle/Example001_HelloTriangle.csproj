@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example001_HelloTriangle</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_triangle.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_triangle.spv -reflection-json $(ProjectDir)Shaders/hello_triangle.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/hello_triangle.spv $(OutDir)hello_triangle.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_triangle.spv.json $(OutDir)hello_triangle.spv.json"/>
+    </Target>
+
+</Project>

@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Example008_HelloDepth</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ExampleBase\ExampleBase.csproj" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_depth.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_depth.spv -reflection-json $(ProjectDir)Shaders/hello_depth.spv.json"/>
+        <Exec Command="slangc $(ProjectDir)Shaders/hello_depth_screen.slang -I ./ -target spirv -o $(ProjectDir)Shaders/hello_depth_screen.spv -reflection-json $(ProjectDir)Shaders/hello_depth_screen.spv.json"/>
+    </Target>
+
+    <Target Name="CopyShader" AfterTargets="PostBuild" DependsOnTargets="PostBuild">
+        <Exec Command="cp $(ProjectDir)Shaders/hello_depth.spv $(OutDir)hello_depth.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_depth.spv.json $(OutDir)hello_depth.spv.json"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_depth_screen.spv $(OutDir)hello_depth_screen.spv"/>
+        <Exec Command="cp $(ProjectDir)Shaders/hello_depth_screen.spv.json $(OutDir)hello_depth_screen.spv.json"/>
+    </Target>
+
+</Project>

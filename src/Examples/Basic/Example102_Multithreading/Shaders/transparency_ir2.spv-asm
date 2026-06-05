@@ -1,0 +1,216 @@
+; SPIR-V
+; Version: 1.5
+; Generator: Khronos Slang Compiler; 0
+; Bound: 205
+; Schema: 0
+OpCapability DrawParameters
+OpCapability Shader
+%159 = OpExtInstImport "GLSL.std.450"
+OpMemoryModel Logical GLSL450
+OpEntryPoint Vertex %VertexMain "VertexMain" %Entity %Camera %gl_Position %entryPointParam_VertexMain_Pixel_Normal %entryPointParam_VertexMain_Pixel_Uv %in_Position %in_Normal %in_Uv
+OpEntryPoint Fragment %PixelMain "PixelMain" %DiffuseTexture %Sampler %entryPointParam_PixelMain %in_Normal_0 %in_Uv_0
+OpExecutionMode %PixelMain OriginUpperLeft
+
+; Debug Information
+OpSource Slang 1
+OpName %in_Position "in.Position"                   ; id %15
+OpName %in_Normal "in.Normal"                       ; id %18
+OpName %in_Uv "in.Uv"                               ; id %21
+OpName %_MatrixStorage_float4x4_ColMajorstd140 "_MatrixStorage_float4x4_ColMajorstd140"     ; id %36
+OpMemberName %_MatrixStorage_float4x4_ColMajorstd140 0 "data"
+OpName %EntityData_std140 "EntityData_std140"       ; id %35
+OpMemberName %EntityData_std140 0 "World"
+OpMemberName %EntityData_std140 1 "Params1"
+OpMemberName %EntityData_std140 2 "Params2"
+OpMemberName %EntityData_std140 3 "Params3"
+OpMemberName %EntityData_std140 4 "Params4"
+OpName %Entity "Entity"                             ; id %40
+OpName %CameraData_std140 "CameraData_std140"       ; id %77
+OpMemberName %CameraData_std140 0 "ViewProj"
+OpName %Camera "Camera"                             ; id %79
+OpName %entryPointParam_VertexMain_Pixel_Normal "entryPointParam_VertexMain.Pixel.Normal"   ; id %132
+OpName %entryPointParam_VertexMain_Pixel_Uv "entryPointParam_VertexMain.Pixel.Uv"           ; id %136
+OpName %VertexMain "VertexMain"                                                             ; id %2
+OpName %in_Normal_0 "in.Normal"                                                             ; id %142
+OpName %in_Uv_0 "in.Uv"                                                                     ; id %144
+OpName %DiffuseTexture "DiffuseTexture"                                                     ; id %148
+OpName %Sampler "Sampler"                                                                   ; id %152
+OpName %sampledImage "sampledImage"                                                         ; id %155
+OpName %sampled "sampled"                                                                   ; id %156
+OpName %halfLambert "halfLambert"                                                           ; id %166
+OpName %entryPointParam_PixelMain "entryPointParam_PixelMain"                               ; id %171
+OpName %PixelMain "PixelMain"                                                               ; id %139
+
+; Annotations
+OpDecorate %in_Position Location 0
+OpDecorate %in_Normal Location 1
+OpDecorate %in_Uv Location 4
+OpDecorate %_arr_v4float_int_4 ArrayStride 16
+OpMemberDecorate %_MatrixStorage_float4x4_ColMajorstd140 0 Offset 0
+OpDecorate %EntityData_std140 Block
+OpMemberDecorate %EntityData_std140 0 Offset 0
+OpMemberDecorate %EntityData_std140 1 Offset 64
+OpMemberDecorate %EntityData_std140 2 Offset 80
+OpMemberDecorate %EntityData_std140 3 Offset 96
+OpMemberDecorate %EntityData_std140 4 Offset 112
+OpDecorate %Entity Binding 2
+OpDecorate %Entity DescriptorSet 0
+OpDecorate %CameraData_std140 Block
+OpMemberDecorate %CameraData_std140 0 Offset 0
+OpDecorate %Camera Binding 0
+OpDecorate %Camera DescriptorSet 0
+OpDecorate %gl_Position BuiltIn Position
+OpDecorate %entryPointParam_VertexMain_Pixel_Normal Location 0
+OpDecorate %entryPointParam_VertexMain_Pixel_Uv Location 1
+OpDecorate %in_Normal_0 Location 0
+OpDecorate %in_Uv_0 Location 1
+OpDecorate %DiffuseTexture Binding 3
+OpDecorate %DiffuseTexture DescriptorSet 0
+OpDecorate %Sampler Binding 1
+OpDecorate %Sampler DescriptorSet 0
+OpDecorate %entryPointParam_PixelMain Location 0
+
+; Types, variables and constants
+%void = OpTypeVoid
+%3 = OpTypeFunction %void
+%float = OpTypeFloat 32
+%v4float = OpTypeVector %float 4
+%v3float = OpTypeVector %float 3
+%v2float = OpTypeVector %float 2
+%_ptr_Input_v3float = OpTypePointer Input %v3float
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+%int = OpTypeInt 32 1
+%mat4v4float = OpTypeMatrix %v4float 4
+%int_4 = OpConstant %int 4
+%_arr_v4float_int_4 = OpTypeArray %v4float %int_4   ; ArrayStride 16
+%_MatrixStorage_float4x4_ColMajorstd140 = OpTypeStruct %_arr_v4float_int_4
+%EntityData_std140 = OpTypeStruct %_MatrixStorage_float4x4_ColMajorstd140 %v4float %v4float %v4float %v4float   ; Block
+%_ptr_Uniform_EntityData_std140 = OpTypePointer Uniform %EntityData_std140
+%int_0 = OpConstant %int 0
+%_ptr_Uniform__MatrixStorage_float4x4_ColMajorstd140 = OpTypePointer Uniform %_MatrixStorage_float4x4_ColMajorstd140
+%float_1 = OpConstant %float 1
+%CameraData_std140 = OpTypeStruct %_MatrixStorage_float4x4_ColMajorstd140   ; Block
+%_ptr_Uniform_CameraData_std140 = OpTypePointer Uniform %CameraData_std140
+%float_0 = OpConstant %float 0
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%_ptr_Output_v3float = OpTypePointer Output %v3float
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+%145 = OpTypeImage %float 2D 2 0 0 1 Unknown
+%_ptr_UniformConstant_145 = OpTypePointer UniformConstant %145
+%149 = OpTypeSampler
+%_ptr_UniformConstant_149 = OpTypePointer UniformConstant %149
+%154 = OpTypeSampledImage %145
+%float_n10 = OpConstant %float -10
+%160 = OpConstantComposite %v3float %float_1 %float_1 %float_n10
+%float_0_5 = OpConstant %float 0.5
+%in_Position = OpVariable %_ptr_Input_v3float Input     ; Location 0
+%in_Normal = OpVariable %_ptr_Input_v4float Input       ; Location 1
+%in_Uv = OpVariable %_ptr_Input_v2float Input           ; Location 4
+%Entity = OpVariable %_ptr_Uniform_EntityData_std140 Uniform    ; Binding 2, DescriptorSet 0
+%Camera = OpVariable %_ptr_Uniform_CameraData_std140 Uniform    ; Binding 0, DescriptorSet 0
+%gl_Position = OpVariable %_ptr_Output_v4float Output           ; BuiltIn Position
+%entryPointParam_VertexMain_Pixel_Normal = OpVariable %_ptr_Output_v3float Output   ; Location 0
+%entryPointParam_VertexMain_Pixel_Uv = OpVariable %_ptr_Output_v2float Output       ; Location 1
+%in_Normal_0 = OpVariable %_ptr_Input_v3float Input                                 ; Location 0
+%in_Uv_0 = OpVariable %_ptr_Input_v2float Input                                     ; Location 1
+%DiffuseTexture = OpVariable %_ptr_UniformConstant_145 UniformConstant              ; Binding 3, DescriptorSet 0
+%Sampler = OpVariable %_ptr_UniformConstant_149 UniformConstant                     ; Binding 1, DescriptorSet 0
+%entryPointParam_PixelMain = OpVariable %_ptr_Output_v4float Output                 ; Location 0
+
+; Function VertexMain
+%VertexMain = OpFunction %void None %3
+%4 = OpLabel
+%13 = OpLoad %v3float %in_Position
+%16 = OpLoad %v4float %in_Normal
+%19 = OpLoad %v2float %in_Uv
+%177 = OpAccessChain %_ptr_Uniform__MatrixStorage_float4x4_ColMajorstd140 %Entity %int_0
+%178 = OpLoad %_MatrixStorage_float4x4_ColMajorstd140 %177
+%179 = OpCompositeExtract %_arr_v4float_int_4 %178 0
+%180 = OpCompositeExtract %v4float %179 0
+%181 = OpCompositeExtract %float %180 0
+%182 = OpCompositeExtract %float %180 1
+%183 = OpCompositeExtract %float %180 2
+%184 = OpCompositeExtract %float %180 3
+%185 = OpCompositeExtract %v4float %179 1
+%186 = OpCompositeExtract %float %185 0
+%187 = OpCompositeExtract %float %185 1
+%188 = OpCompositeExtract %float %185 2
+%189 = OpCompositeExtract %float %185 3
+%190 = OpCompositeExtract %v4float %179 2
+%191 = OpCompositeExtract %float %190 0
+%192 = OpCompositeExtract %float %190 1
+%193 = OpCompositeExtract %float %190 2
+%194 = OpCompositeExtract %float %190 3
+%195 = OpCompositeExtract %v4float %179 3
+%196 = OpCompositeExtract %float %195 0
+%197 = OpCompositeExtract %float %195 1
+%198 = OpCompositeExtract %float %195 2
+%199 = OpCompositeExtract %float %195 3
+%200 = OpCompositeConstruct %v4float %181 %186 %191 %196
+%201 = OpCompositeConstruct %v4float %182 %187 %192 %197
+%202 = OpCompositeConstruct %v4float %183 %188 %193 %198
+%203 = OpCompositeConstruct %v4float %184 %189 %194 %199
+%204 = OpCompositeConstruct %mat4v4float %200 %201 %202 %203
+%72 = OpCompositeConstruct %v4float %13 %float_1
+%74 = OpVectorTimesMatrix %v4float %72 %204
+%80 = OpAccessChain %_ptr_Uniform__MatrixStorage_float4x4_ColMajorstd140 %Camera %int_0
+%81 = OpLoad %_MatrixStorage_float4x4_ColMajorstd140 %80
+%82 = OpCompositeExtract %_arr_v4float_int_4 %81 0
+%83 = OpCompositeExtract %v4float %82 0
+%84 = OpCompositeExtract %float %83 0
+%85 = OpCompositeExtract %float %83 1
+%86 = OpCompositeExtract %float %83 2
+%87 = OpCompositeExtract %float %83 3
+%88 = OpCompositeExtract %v4float %82 1
+%89 = OpCompositeExtract %float %88 0
+%90 = OpCompositeExtract %float %88 1
+%91 = OpCompositeExtract %float %88 2
+%92 = OpCompositeExtract %float %88 3
+%93 = OpCompositeExtract %v4float %82 2
+%94 = OpCompositeExtract %float %93 0
+%95 = OpCompositeExtract %float %93 1
+%96 = OpCompositeExtract %float %93 2
+%97 = OpCompositeExtract %float %93 3
+%98 = OpCompositeExtract %v4float %82 3
+%99 = OpCompositeExtract %float %98 0
+%100 = OpCompositeExtract %float %98 1
+%101 = OpCompositeExtract %float %98 2
+%102 = OpCompositeExtract %float %98 3
+%103 = OpCompositeConstruct %v4float %84 %89 %94 %99
+%104 = OpCompositeConstruct %v4float %85 %90 %95 %100
+%105 = OpCompositeConstruct %v4float %86 %91 %96 %101
+%106 = OpCompositeConstruct %v4float %87 %92 %97 %102
+%107 = OpCompositeConstruct %mat4v4float %103 %104 %105 %106
+%108 = OpVectorTimesMatrix %v4float %74 %107
+%115 = OpVectorShuffle %v3float %16 %16 0 1 2
+%116 = OpCompositeConstruct %v4float %115 %float_0
+%118 = OpVectorTimesMatrix %v4float %116 %204
+%119 = OpVectorShuffle %v3float %118 %118 0 1 2
+OpStore %gl_Position %108
+OpStore %entryPointParam_VertexMain_Pixel_Normal %119
+OpStore %entryPointParam_VertexMain_Pixel_Uv %19
+OpReturn
+OpFunctionEnd
+
+; Function PixelMain
+%PixelMain = OpFunction %void None %3
+%140 = OpLabel
+%141 = OpLoad %v3float %in_Normal_0
+%143 = OpLoad %v2float %in_Uv_0
+%146 = OpLoad %145 %DiffuseTexture
+%150 = OpLoad %149 %Sampler
+%sampledImage = OpSampledImage %154 %146 %150
+%sampled = OpImageSampleImplicitLod %v4float %sampledImage %143 None
+%158 = OpExtInst %v3float %159 Normalize %160
+%162 = OpFNegate %v3float %158
+%163 = OpDot %float %141 %162
+%164 = OpFMul %float %163 %float_0_5
+%halfLambert = OpFAdd %float %164 %float_0_5
+%167 = OpVectorShuffle %v3float %sampled %sampled 0 1 2
+%168 = OpVectorTimesScalar %v3float %167 %halfLambert
+%169 = OpCompositeExtract %float %sampled 3
+%170 = OpCompositeConstruct %v4float %168 %169
+OpStore %entryPointParam_PixelMain %170
+OpReturn
+OpFunctionEnd

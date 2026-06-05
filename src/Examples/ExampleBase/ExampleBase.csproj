@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Kaldera.Abstractions\Kaldera.Abstractions.csproj" />
+      <ProjectReference Include="..\..\Kaldera\Kaldera.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="SDL3-CS" Version="3.3.2.1"/>
+        <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
+        <PackageReference Include="StbImageSharp" Version="2.30.15" />
+    </ItemGroup>
+
+</Project>

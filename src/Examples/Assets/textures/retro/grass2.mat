@@ -1,0 +1,5 @@
+
+diffuseMap textures/retro/grass2.png
+
+alphaTest
+alphaToCoverage
