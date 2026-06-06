@@ -58,10 +58,10 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 	private Vector2 mSize;
 
 	public SampleCountFlags Multisampling { get; private set; }
-	public required Ref<TextureArray<AttachmentColour>>? ColourAttachmentsMsaa { get; set; }
-	public required Ref<TextureArray<AttachmentColour>> ColourAttachments { get; set; }
-	public required Ref<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachmentsMsaa { get; set; }
-	public required Ref<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachments { get; set; }
+	public required Box<TextureArray<AttachmentColour>>? ColourAttachmentsMsaa { get; set; }
+	public required Box<TextureArray<AttachmentColour>> ColourAttachments { get; set; }
+	public required Box<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachmentsMsaa { get; set; }
+	public required Box<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachments { get; set; }
 
 	public Vector2 CurrentSize => mSize;
 
@@ -78,10 +78,10 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 
 	private struct AttachmentBundle
 	{
-		public required Ref<TextureArray<AttachmentColour>>? ColourAttachmentsMsaa { get; init; }
-		public required Ref<TextureArray<AttachmentColour>> ColourAttachments { get; init; }
-		public required Ref<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachmentsMsaa { get; init; }
-		public required Ref<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachments { get; init; }
+		public required Box<TextureArray<AttachmentColour>>? ColourAttachmentsMsaa { get; init; }
+		public required Box<TextureArray<AttachmentColour>> ColourAttachments { get; init; }
+		public required Box<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachmentsMsaa { get; init; }
+		public required Box<TextureArray<AttachmentDepthStencil>>? DepthStencilAttachments { get; init; }
 	};
 
 	private static Result<AttachmentBundle> CreateInternal<T>( T allocator, TextureRenderTargetOptions options )

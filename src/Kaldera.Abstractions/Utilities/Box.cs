@@ -6,18 +6,18 @@ namespace Kaldera.Abstractions.Utilities;
 /// <summary>
 /// Elevates a value type to a reference type.
 /// </summary>
-public class Ref<T>( in T value )
+public class Box<T>( in T value )
 	where T : struct
 {
 	private T mValue = value;
 
 	public ref T Value => ref mValue;
-	public static implicit operator Ref<T>( T value ) => new( value );
+	public static implicit operator Box<T>( T value ) => new( value );
 }
 
-public static class RefExtensions
+public static class BoxExtensions
 {
-	public static void Dispose<T>( this Ref<T> self )
+	public static void Dispose<T>( this Box<T> self )
 		where T : struct, IDisposable
 		=> self.Value.Dispose();
 }
