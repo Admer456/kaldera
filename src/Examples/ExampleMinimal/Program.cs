@@ -1,6 +1,16 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright 2025-2026 Admer "Admer456" Šuko (admer456@gmail.com)
 
+// Hey! Welcome. This is a "minimal" example, showcasing the bare minimum required
+// for a "hello triangle" kinda setup. In its current state, it still uses some
+// minor utilities from ExampleBase, so... I'll have to clean that up
+
+// In the meantime, I'll just point out what's part of ExampleBase:
+// - *.Check() and *.Checked() - those report errors and trip the debugger
+// - ExampleWindowHelper
+// You are nonetheless encouraged to look at ExampleBase and see the insides!
+// It's got a 3D camera helper, an OBJ loader, a glTF loader and other utilities
+
 // If you count SDL, comments, error checking, window events and the like,
 // this is indeed some 400 lines of code. However, without all that,
 // the crux of this example is some 200 LoC. Quite compact for Vulkan :3
@@ -67,12 +77,17 @@ internal static partial class Program
 
 	private static Result RenderFrame()
 	{
+		// You may wonder: isn't this a bad thing? Yes, it would prevent you
+		// from doing computations that span over multiple frames. But this is a
+		// dumb minimal example, and we're not computing anything over 2+ frames.
+		// You'd want to check the render target's fences instead, or something else
 		mDevice.WaitIdle().Check();
 
 		// Skip this frame if the render target isn't ready
 		// Cases where this happens: window minimised, just resized etc.
 		if ( !mRenderTarget.Prepare().Get( out var error, out var swapchainResult ) || swapchainResult is SwapchainResult.Skip )
 		{
+			error?.PrintError();
 			return Result.Success();
 		}
 
@@ -134,7 +149,8 @@ internal static partial class Program
 
 	private static void LimitFramerate( double framerate, double frameStart )
 	{
-		// Really, really wonky frame limiter
+		// Really, really wonky frame limiter. There's a MUCH
+		// more robust one in ExampleBase.ExampleStartup
 		double frameDuration = GetSeconds() - frameStart;
 		double toSleep = (1.0f / framerate) - frameDuration;
 		if ( toSleep <= 0.0 )
@@ -149,6 +165,7 @@ internal static partial class Program
 
 	#region Graphics
 
+	// Don't mind the null! stuff, focus on the types :)
 	private static KaInstance mInstance = null!;
 	private static KaPhysicalDevice mPhysicalDevice = null!;
 	private static KaDevice mDevice = null!;
@@ -162,6 +179,8 @@ internal static partial class Program
 	private static VertexBuffer<VertexData> mVertexBuffer = null!;
 	private static IndexBuffer mIndexBuffer = null!;
 
+	// This is a description of how vertex data will be arranged in the vertex buffer.
+	// You provide a size in bytes and a series of vertex attributes.
 	[StructLayout( LayoutKind.Sequential )]
 	private struct VertexData : IVertexData
 	{
@@ -214,7 +233,7 @@ internal static partial class Program
 
 		// A command buffer is where you'll write down series of commands for the GPU. Copy this
 		// buffer into that buffer, clear this image, draw these triangles, compute XYZ etc.
-		CreateCommandBuffer();
+		mCommands = KaCommandBuffer.CreatePrimary( mQueue ).Checked();
 
 		// A render target can be a window, an arbitrary texture image, a VR headset's display or whatever
 		CreateRenderTarget();
@@ -236,9 +255,6 @@ internal static partial class Program
 		Debug.WriteLine( $"[{flags}] ({objectType}) {message}" );
 	}
 
-	private static string[] GetSdlInstanceExtensions()
-		=> SDL.VulkanGetInstanceExtensions( out _ ) ?? [];
-
 	private static void CreateDeviceAndQueue()
 	{
 		// Before creating an instance, you can check for any needed extensions
@@ -258,18 +274,13 @@ internal static partial class Program
 			// In this case, SDL will give us some needed extensions for windowing,
 			// and Startup will add VK_KHR_portability_subset there for compatibility with MoltenVK,
 			// as well as some other extensions like VK_KHR_surface
-			InstanceExtensions = GetSdlInstanceExtensions()
+			InstanceExtensions = SDL.VulkanGetInstanceExtensions( out _ ) ?? []
 		} ).Checked();
 
 		mDevice = graphicsContext.Device;
 		mQueue = graphicsContext.Queue;
 		mPhysicalDevice = mDevice.Physical;
 		mInstance = mDevice.Instance;
-	}
-
-	private static void CreateCommandBuffer()
-	{
-		mCommands = KaCommandBuffer.CreatePrimary( mQueue ).Checked();
 	}
 
 	private static void CreateRenderTarget()
@@ -306,6 +317,7 @@ internal static partial class Program
 		// In this case, the shader has both a VertexMain and a PixelMain
 		mShaderSet = new VertexShaderSet( shaderFile, "VertexMain", shaderFile, "PixelMain" );
 
+		// There's an explanation for pipelines in RenderFrame(). TL;DR you can think of it as a "render preset"
 		mPipeline = KaGraphicsPipeline.Create( mDevice, new()
 		{
 			// No shader resources for now
@@ -314,15 +326,17 @@ internal static partial class Program
 			// This can be assembled manually, in case of a data-driven shader system and such
 			VertexInputs = [VertexData.InputLayout],
 			ShaderSet = mShaderSet,
-			// The viewport and scissor are set up each time when rendering to mRenderTarget
+			// The viewport and scissor are set up each time when rendering to mRenderTarget.
+			// Without these two, we'd have to rebuild the pipeline each time the window resized, oof
 			DynamicStates = [DynamicState.Viewport, DynamicState.Scissor],
-			// You'll be using this one 99% of the time
+			// You'll be using this one 99% of the time. There are also points, lines etc.
 			Topology = PrimitiveTopology.TriangleList,
-			// Render to one color image with opaque blending
+			// Render to one colour image with opaque blending
 			Color = new() { Attachments = [(BlendAttachments.Opaque, Format.B8G8R8A8Unorm)] },
-			// No depth buffer
+			// No depth buffer. Refer to Example008_HelloDepth
 			DepthStencil = null,
-			// Typical render mode
+			// Typical rasterizer options. You wanna fill, cull backfaces, and the front face winding
+			// may depend on your convention, input geometry, viewport orientation...... that's sorta up to you
 			Rasterizer = new()
 			{
 				PolygonMode = PolygonMode.Fill,
@@ -344,8 +358,8 @@ internal static partial class Program
 		];
 
 		// An allocator determines how buffers are laid out in video memory. Right now we're using
-		// a "dumb" one - for each buffer it allocates a unique block of GPU memory. This is not good,
-		// but it works for a tutorial.
+		// a "dumb" one - for each buffer it allocates a unique block of GPU memory.
+		// This is not good, but it works for a tutorial.
 		mAllocator = SimpleAllocator.Create( mDevice, mQueue );
 
 		// Traditionally in Vulkan, you'd do a multistep process in order to upload data.
