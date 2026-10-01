@@ -9,28 +9,16 @@ namespace Kaldera.Abstractions.Extensions;
 
 public static class TextureCommandExtensions
 {
-	public static void TransitionTextureLayout<T>( this KaCommandBuffer self, ref T texture, ImageLayout newLayout )
+	public static Result<nint> Export<T>( this T self )
 		where T : IGpuTexture
 	{
-		if ( texture.CurrentLayout == newLayout )
+		Result<DeviceMemory> result = self.Allocator.GetImageMemory( self.State.Image );
+		if ( !result.Get( out Error? error, out DeviceMemory memoryBlock ) )
 		{
-			return;
+			return error.Prepend( "Failed to Export() texture" );
 		}
 
-		self.TransitionImageLayout(
-			texture.State.Image.VkImage,
-			oldLayout: texture.CurrentLayout,
-			newLayout,
-			srcAccessMask: AccessFlags2.None,
-			dstAccessMask: AccessFlags2.None,
-			srcStageMask: PipelineStageFlags2.None,
-			dstStageMask: PipelineStageFlags2.None,
-			texture.AspectFlags,
-			texture.State.MipLevels,
-			texture.State.ArrayLayers
-		);
-
-		texture.CurrentLayout = newLayout;
+		return self.State.Image.Export( memoryBlock );
 	}
 
 	public static void CopyBufferToTexture<T>( this KaCommandBuffer self, StagingBuffer source, in T destination, Span<BufferImageCopy> regions )
