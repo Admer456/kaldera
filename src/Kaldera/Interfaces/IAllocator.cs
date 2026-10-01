@@ -25,6 +25,9 @@ public interface IResourceAllocator
 	ulong GetBufferMemoryOffset( KaBuffer buffer );
 	ulong GetImageMemoryOffset( KaImage image );
 
+	ulong GetBufferMemorySize( KaBuffer buffer );
+	ulong GetImageMemorySize( KaImage image );
+
 	/// <summary>
 	/// Destroys a buffer, clearing up allocated resources as necessary.
 	/// </summary>

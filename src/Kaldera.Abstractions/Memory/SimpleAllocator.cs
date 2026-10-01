@@ -13,8 +13,14 @@ namespace Kaldera.Abstractions.Memory;
 /// </summary>
 public unsafe class SimpleAllocator : IResourceAllocator
 {
-	private readonly Dictionary<KaBuffer, DeviceMemory> mBufferMemoryMap = [];
-	private readonly Dictionary<KaImage, DeviceMemory> mImageMemoryMap = [];
+	private struct MemoryInfo
+	{
+		public MemoryRequirements Requirements;
+		public DeviceMemory Memory;
+	}
+
+	private readonly Dictionary<KaBuffer, MemoryInfo> mBufferMemoryMap = [];
+	private readonly Dictionary<KaImage, MemoryInfo> mImageMemoryMap = [];
 
 	public required KaDevice Device { get; init; }
 	public required KaQueue Queue { get; init; }
@@ -67,7 +73,7 @@ public unsafe class SimpleAllocator : IResourceAllocator
 		}
 
 		NumAllocations++;
-		map[resource] = memory;
+		map[resource] = new() { Memory = memory, Requirements = requirements };
 		return resource;
 	}
 
@@ -105,9 +111,9 @@ public unsafe class SimpleAllocator : IResourceAllocator
 
 	public Result<DeviceMemory> GetBufferMemory( KaBuffer buffer )
 	{
-		if ( mBufferMemoryMap.TryGetValue( buffer, out DeviceMemory memory ) )
+		if ( mBufferMemoryMap.TryGetValue( buffer, out MemoryInfo info ) )
 		{
-			return memory;
+			return info.Memory;
 		}
 
 		return new Error( "SimpleAllocator.GetBufferMemory: Not found" );
@@ -115,9 +121,9 @@ public unsafe class SimpleAllocator : IResourceAllocator
 
 	public Result<DeviceMemory> GetImageMemory( KaImage image )
 	{
-		if ( mImageMemoryMap.TryGetValue( image, out DeviceMemory memory ) )
+		if ( mImageMemoryMap.TryGetValue( image, out MemoryInfo info ) )
 		{
-			return memory;
+			return info.Memory;
 		}
 
 		return new Error( "SimpleAllocator.GetImageMemory: Not found" );
@@ -129,27 +135,47 @@ public unsafe class SimpleAllocator : IResourceAllocator
 	public ulong GetImageMemoryOffset( KaImage image )
 		=> 0UL;
 
+	public ulong GetBufferMemorySize( KaBuffer buffer )
+	{
+		if ( mBufferMemoryMap.TryGetValue( buffer, out MemoryInfo info ) )
+		{
+			return info.Requirements.Size;
+		}
+
+		return 0UL;
+	}
+
+	public ulong GetImageMemorySize( KaImage image )
+	{
+		if ( mImageMemoryMap.TryGetValue( image, out MemoryInfo info ) )
+		{
+			return info.Requirements.Size;
+		}
+
+		return 0UL;
+	}
+
 	public bool DestroyBuffer( KaBuffer buffer )
 	{
-		if ( !mBufferMemoryMap.TryGetValue( buffer, out DeviceMemory value ) )
+		if ( !mBufferMemoryMap.TryGetValue( buffer, out MemoryInfo value ) )
 		{
 			return false;
 		}
 
 		buffer.Dispose();
-		Vulkan.Vk.FreeMemory( Device.VkDevice, value, null );
+		Vulkan.Vk.FreeMemory( Device.VkDevice, value.Memory, null );
 		return true;
 	}
 
 	public bool DestroyImage( KaImage image )
 	{
-		if ( !mImageMemoryMap.TryGetValue( image, out DeviceMemory value ) )
+		if ( !mImageMemoryMap.TryGetValue( image, out MemoryInfo value ) )
 		{
 			return false;
 		}
 
 		image.Dispose();
-		Vulkan.Vk.FreeMemory( Device.VkDevice, value, null );
+		Vulkan.Vk.FreeMemory( Device.VkDevice, value.Memory, null );
 		return true;
 	}
 }
