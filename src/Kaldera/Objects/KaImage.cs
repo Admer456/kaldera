@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright 2025-2026 Admer "Admer456" Šuko (admer456@gmail.com)
 
+using System.Runtime.InteropServices;
 using Kaldera.Interfaces;
 
 namespace Kaldera.Objects;
@@ -17,6 +18,7 @@ public struct ImageOptions
 	public required uint ArrayLayers;
 	public required SampleCountFlags Samples;
 	public required ImageUsageFlags Usage;
+	public bool Exportable;
 
 	public static ImageOptions Common( Format format, int width, int height, int depth, int mips, int layers, ImageUsageFlags usage )
 		=> new()
@@ -101,6 +103,32 @@ public unsafe struct KaImage : IMemoryBindable, IDisposable
 			SharingMode = SharingMode.Exclusive
 		};
 
+		ExternalMemoryImageCreateInfo externalMemory = new()
+		{
+			SType = StructureType.ExternalMemoryImageCreateInfo,
+			HandleTypes = ExternalMemoryHandleTypeFlags.OpaqueFDBit
+		};
+
+		ExportMetalObjectCreateInfoEXT externalMemoryMac = new()
+		{
+			SType = StructureType.ExportMetalObjectCreateInfoExt,
+			ExportObjectType = ExportMetalObjectTypeFlagsEXT.IosurfaceBitExt
+		};
+
+		if ( options.Exportable )
+		{
+			imageInfo.PNext = &externalMemory; // Linux
+
+			if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
+			{
+				externalMemory.HandleTypes = ExternalMemoryHandleTypeFlags.OpaqueWin32Bit;
+			}
+			else if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
+			{
+				imageInfo.PNext = &externalMemoryMac;
+			}
+		}
+
 		VkResult result = Vulkan.Vk.CreateImage( device.VkDevice, &imageInfo, null, out VkImage image );
 		if ( result is not VkResult.Success )
 		{
@@ -152,6 +180,94 @@ public unsafe struct KaImage : IMemoryBindable, IDisposable
 
 	public VkResult Bind( DeviceMemory memory, ulong offset )
 		=> Vulkan.Vk.BindImageMemory( Device.VkDevice, VkImage, memory, offset );
+
+	public void GetExportableInfo(
+		out MemoryDedicatedAllocateInfo dedicatedAllocation,
+		out ExportMemoryAllocateInfo exportAllocateInfo )
+	{
+		dedicatedAllocation = new()
+		{
+			SType = StructureType.MemoryDedicatedAllocateInfo,
+			Image = VkImage
+		};
+
+		exportAllocateInfo = new()
+		{
+			SType = StructureType.ExportMemoryAllocateInfo,
+			HandleTypes = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )
+				? ExternalMemoryHandleTypeFlags.OpaqueWin32Bit
+				: ExternalMemoryHandleTypeFlags.OpaqueFDBit
+		};
+	}
+
+	public Result<IntPtr> Export( DeviceMemory memoryBlock )
+		=> Environment.OSVersion.Platform switch
+		{
+			PlatformID.Unix => ExportLinuxFdHandle( memoryBlock ),
+			PlatformID.Win32NT => ExportWin32Handle( memoryBlock ),
+			PlatformID.MacOSX => ExportMacHandle(),
+			_ => new Error( "Platform not supported" )
+		};
+
+	public Result<IntPtr> ExportWin32Handle( DeviceMemory memoryBlock )
+	{
+		MemoryGetWin32HandleInfoKHR info = new()
+		{
+			SType = StructureType.MemoryGetWin32HandleInfoKhr,
+			HandleType = ExternalMemoryHandleTypeFlags.OpaqueWin32Bit,
+			Memory = memoryBlock
+		};
+
+		VkResult errorCode = Vulkan.ExternalMemoryWin32.GetMemoryWin32Handle( Device.VkDevice, ref info, out IntPtr handle );
+		if ( errorCode is not VkResult.Success )
+		{
+			return new Error( errorCode.ToString() );
+		}
+
+		return handle;
+	}
+
+	public Result<IntPtr> ExportLinuxFdHandle( DeviceMemory memoryBlock )
+	{
+		MemoryGetFdInfoKHR info = new()
+		{
+			SType = StructureType.MemoryGetFDInfoKhr,
+			HandleType = ExternalMemoryHandleTypeFlags.OpaqueFDBit,
+			Memory = memoryBlock
+		};
+
+		VkResult errorCode = Vulkan.ExternalMemoryFd.GetMemoryF( Device.VkDevice, ref info, out int handle );
+		if ( errorCode is not VkResult.Success )
+		{
+			return new Error( errorCode.ToString() );
+		}
+
+		return handle;
+	}
+
+	public Result<IntPtr> ExportMacHandle()
+	{
+		ExportMetalIOSurfaceInfoEXT surfaceExport = new()
+		{
+			SType = StructureType.ExportMetalIOSurfaceInfoExt,
+			Image = VkImage
+		};
+
+		ExportMetalObjectsInfoEXT export = new()
+		{
+			SType = StructureType.ExportMetalObjectsInfoExt,
+			PNext = &surfaceExport
+		};
+
+		Vulkan.MetalObjects.ExportMetalObjects( Device.VkDevice, ref export );
+
+		if ( surfaceExport.IoSurface == IntPtr.Zero )
+		{
+			return new Error( "Couldn't export IOSurfaceRef" );
+		}
+
+		return surfaceExport.IoSurface;
+	}
 
 	public void Dispose()
 		=> Vulkan.Vk.DestroyImage( Device.VkDevice, VkImage, null );

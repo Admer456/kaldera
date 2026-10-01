@@ -25,11 +25,12 @@ public class AttachmentDepthStencil : IGpuTexture, ITextureArrayCapable, ITextur
 	public required ImageAspectFlags AspectFlags { get; init; }
 	public ImageLayout CurrentLayout { get; set; } = ImageLayout.Undefined;
 
-	public static Result<AttachmentDepthStencil> Create<T>( T allocator, int width, int height, bool withStencil, SampleCountFlags samples )
+	public static Result<AttachmentDepthStencil> Create<T>( T allocator, int width, int height, bool withStencil, SampleCountFlags samples,
+		bool exportable = false )
 		where T : IResourceAllocator
 	{
 		(Format format, ImageAspectFlags aspectFlags) = GetFormatAndAspect( withStencil );
-		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, 1, UsageFlags ) with { Samples = samples };
+		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, 1, UsageFlags ) with { Samples = samples, Exportable = exportable };
 		ImageViewOptions viewOptions = ImageViewOptions.Common( options, aspectFlags );
 
 		var result = Texture.Create( allocator, options, viewOptions );
@@ -42,11 +43,11 @@ public class AttachmentDepthStencil : IGpuTexture, ITextureArrayCapable, ITextur
 	}
 
 	public static Result<TextureArray<AttachmentDepthStencil>> CreateArray<T>( T allocator, int width, int height, bool withStencil, SampleCountFlags samples,
-		int layers )
+		int layers, bool exportable = false )
 		where T : IResourceAllocator
 	{
 		(Format format, ImageAspectFlags aspectFlags) = GetFormatAndAspect( withStencil );
-		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, layers, UsageFlags ) with { Samples = samples };
+		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, layers, UsageFlags ) with { Samples = samples, Exportable = exportable };
 		ImageViewOptions viewOptions = ImageViewOptions.Common( options, aspectFlags );
 
 		var result = Texture.Create( allocator, options, viewOptions );

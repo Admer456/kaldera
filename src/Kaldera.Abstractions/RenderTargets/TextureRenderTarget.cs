@@ -23,6 +23,7 @@ public struct TextureRenderTargetOptions
 	public int ColourLayers { get; set; } = 1;
 	public int DepthLayers { get; set; } = 1;
 	public bool? DepthWithStencil { get; set; } = null;
+	public bool Exportable { get; set; }
 
 	public static TextureRenderTargetOptions Colour( int width, int height, Format colourFormat )
 		=> new()
@@ -88,7 +89,7 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 		where T : IResourceAllocator
 	{
 		var colour = AttachmentColour.CreateArray( allocator, options.ColourFormat, options.Width, options.Height, SampleCountFlags.Count1Bit,
-			options.ColourLayers );
+			options.ColourLayers, options.Exportable );
 		if ( !colour.Get( out var error, out var colourValue ) )
 		{
 			return new Error( "TextureRenderTarget: Failed to create colour attachment", error );
@@ -99,7 +100,7 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 		{
 			var depthStencil = AttachmentDepthStencil.CreateArray( allocator, options.Width, options.Height, options.DepthWithStencil.Value,
 				SampleCountFlags.Count1Bit,
-				options.DepthLayers );
+				options.DepthLayers, options.Exportable );
 			if ( !depthStencil.Get( out error, out var depthStencilValue ) )
 			{
 				return new Error( "TextureRenderTarget: Failed to create depth stencil attachment", error );
@@ -112,6 +113,7 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 		TextureArray<AttachmentDepthStencil>? depthStencilAttachmentMsaa = null;
 		if ( options.Samples is not SampleCountFlags.Count1Bit )
 		{
+			// TODO: Can multisampled images be exported and is it useful anywhere?
 			var colourMsaa = AttachmentColour.CreateArray( allocator, options.ColourFormat, options.Width, options.Height, options.Samples,
 				options.ColourLayers );
 			if ( !colourMsaa.Get( out error, out var colourMsaaValue ) )

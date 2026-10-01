@@ -20,10 +20,10 @@ public class AttachmentColour : IGpuTexture, ITextureArrayCapable, ITextureBlitD
 	public ImageLayout CurrentLayout { get; set; } = ImageLayout.Undefined;
 	public ImageAspectFlags AspectFlags => ImageAspectFlags.ColorBit;
 
-	public static Result<AttachmentColour> Create<T>( T allocator, Format format, int width, int height, SampleCountFlags samples )
+	public static Result<AttachmentColour> Create<T>( T allocator, Format format, int width, int height, SampleCountFlags samples, bool exportable = false )
 		where T : IResourceAllocator
 	{
-		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, 1, UsageFlags ) with { Samples = samples };
+		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, 1, UsageFlags ) with { Samples = samples, Exportable = exportable };
 		ImageViewOptions viewOptions = ImageViewOptions.Common( options );
 
 		var result = Texture.Create( allocator, options, viewOptions );
@@ -36,10 +36,10 @@ public class AttachmentColour : IGpuTexture, ITextureArrayCapable, ITextureBlitD
 	}
 
 	public static Result<TextureArray<AttachmentColour>> CreateArray<T>( T allocator, Format format, int width, int height, SampleCountFlags samples,
-		int layers )
+		int layers, bool exportable = false )
 		where T : IResourceAllocator
 	{
-		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, layers, UsageFlags ) with { Samples = samples };
+		ImageOptions options = ImageOptions.Common( format, width, height, 1, 1, layers, UsageFlags ) with { Samples = samples, Exportable = exportable };
 		ImageViewOptions viewOptions = ImageViewOptions.Common( options );
 
 		var result = Texture.Create( allocator, options, viewOptions );

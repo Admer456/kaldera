@@ -5,6 +5,7 @@ namespace Kaldera.Interfaces;
 
 public interface IMemoryBindable
 {
+	void GetExportableInfo( out MemoryDedicatedAllocateInfo dedicatedAllocation, out ExportMemoryAllocateInfo exportAllocateInfo );
 	VkResult Bind( DeviceMemory memory, ulong offset );
 	MemoryRequirements GetMemoryRequirements();
 }

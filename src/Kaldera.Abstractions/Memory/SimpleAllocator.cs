@@ -30,14 +30,25 @@ public unsafe class SimpleAllocator : IResourceAllocator
 			MaxAllocations = device.Physical.GetProperties().Limits.MaxMemoryAllocationCount
 		};
 
-	private Result<T> AllocateAndBind<T>( string method, Dictionary<T, DeviceMemory> map, T resource, MemoryPropertyFlags memoryFlags )
+	private Result<T> AllocateAndBind<T>( string method, Dictionary<T, MemoryInfo> map, T resource, MemoryPropertyFlags memoryFlags, bool exportable )
 		where T : IMemoryBindable, IDisposable
 	{
-		MemoryAllocateInfo allocateInfo = Device.GetAllocationInfo( resource.GetMemoryRequirements(), memoryFlags );
+		MemoryRequirements requirements = resource.GetMemoryRequirements();
+		MemoryAllocateInfo allocateInfo = Device.GetAllocationInfo( requirements, memoryFlags );
 		if ( allocateInfo.MemoryTypeIndex is uint.MaxValue )
 		{
 			resource.Dispose();
 			return new Error( $"SimpleAllocator.{method}: Couldn't find a good memory type" );
+		}
+
+		resource.GetExportableInfo(
+			out MemoryDedicatedAllocateInfo dedicatedAllocation,
+			out ExportMemoryAllocateInfo exportAllocateInfo );
+
+		if ( exportable && !OperatingSystem.IsMacOS() )
+		{
+			allocateInfo.PNext = &exportAllocateInfo;
+			exportAllocateInfo.PNext = &dedicatedAllocation;
 		}
 
 		VkResult error = Vulkan.Vk.AllocateMemory( Device.VkDevice, ref allocateInfo, null, out DeviceMemory memory );
@@ -73,7 +84,7 @@ public unsafe class SimpleAllocator : IResourceAllocator
 			return error;
 		}
 
-		return AllocateAndBind( "CreateBuffer", mBufferMemoryMap, buffer, memoryFlags );
+		return AllocateAndBind( "CreateBuffer", mBufferMemoryMap, buffer, memoryFlags, false );
 	}
 
 	public Result<KaImage> CreateImage( ImageOptions options )
@@ -89,7 +100,7 @@ public unsafe class SimpleAllocator : IResourceAllocator
 			return error;
 		}
 
-		return AllocateAndBind( "CreateImage", mImageMemoryMap, image, MemoryPropertyFlags.DeviceLocalBit );
+		return AllocateAndBind( "CreateImage", mImageMemoryMap, image, MemoryPropertyFlags.DeviceLocalBit, options.Exportable );
 	}
 
 	public Result<DeviceMemory> GetBufferMemory( KaBuffer buffer )

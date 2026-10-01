@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright 2025-2026 Admer "Admer456" Šuko (admer456@gmail.com)
 
+using System.Runtime.InteropServices;
 using Kaldera.Interfaces;
 
 namespace Kaldera.Objects;
@@ -68,6 +69,27 @@ public readonly unsafe struct KaBuffer : IMemoryBindable, IDisposable
 			Start = start,
 			Length = length
 		};
+
+	public void GetExportableInfo(
+		out MemoryDedicatedAllocateInfo dedicatedAllocation,
+		out ExportMemoryAllocateInfo exportAllocateInfo )
+	{
+		dedicatedAllocation = new()
+		{
+			SType = StructureType.MemoryDedicatedAllocateInfo,
+			Buffer = VkBuffer
+		};
+
+		exportAllocateInfo = new()
+		{
+			SType = StructureType.ExportMemoryAllocateInfo,
+			HandleTypes = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )
+				? ExternalMemoryHandleTypeFlags.OpaqueWin32Bit
+				: ExternalMemoryHandleTypeFlags.OpaqueFDBit
+		};
+	}
+
+	// TODO: Export someday
 
 	public void Dispose()
 		=> Vulkan.Vk.DestroyBuffer( Device.VkDevice, VkBuffer, null );
