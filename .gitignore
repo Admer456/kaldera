@@ -42,3 +42,7 @@ src/**/Properties/
 ultra*.json
 # Blender backups
 *.blend1
+# SPIR-V binaries and debug data
+*.spv
+*.spv.json
+*.spv-asm
