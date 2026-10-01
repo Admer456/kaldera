@@ -26,19 +26,19 @@ public sealed unsafe class KaQueue
 		};
 	}
 
-	public void Submit( KaCommandBuffer commandBuffer, VkFence? fence = null, PipelineStageFlags stageFlags = PipelineStageFlags.ColorAttachmentOutputBit )
+	public void Submit( KaCommandBuffer commandBuffer, VkFence? fence = null, PipelineStageFlags? stageFlags = PipelineStageFlags.ColorAttachmentOutputBit )
 		// TODO: Check if this [commandBuffer] has any influence on performance
 		=> Submit( [commandBuffer], null, null, fence, stageFlags );
 
-	public void Submit( Span<KaCommandBuffer> commands, VkFence? fence = null, PipelineStageFlags stageFlags = PipelineStageFlags.ColorAttachmentOutputBit )
+	public void Submit( Span<KaCommandBuffer> commands, VkFence? fence = null, PipelineStageFlags? stageFlags = PipelineStageFlags.ColorAttachmentOutputBit )
 		=> Submit( commands, null, null, fence, stageFlags );
 
-	public void Submit( KaCommandBuffer commandBuffer, VkSemaphore? waitSemaphore, VkSemaphore? signalSemaphore, VkFence? fence = null,
-		PipelineStageFlags waitStage = PipelineStageFlags.ColorAttachmentOutputBit )
+	public void Submit( KaCommandBuffer commandBuffer, VkSemaphore? waitSemaphore, VkSemaphore? signalSemaphore, VkFence? fence,
+		PipelineStageFlags? waitStage )
 		=> Submit( [commandBuffer], waitSemaphore, signalSemaphore, fence, waitStage );
 
-	public void Submit( ReadOnlySpan<KaCommandBuffer> commands, VkSemaphore? waitSemaphore, VkSemaphore? signalSemaphore, VkFence? fence = null,
-		PipelineStageFlags waitStage = PipelineStageFlags.ColorAttachmentOutputBit )
+	public void Submit( ReadOnlySpan<KaCommandBuffer> commands, VkSemaphore? waitSemaphore, VkSemaphore? signalSemaphore, VkFence? fence,
+		PipelineStageFlags? waitStage )
 	{
 		Span<VkCommandBuffer> commandBuffers = stackalloc VkCommandBuffer[commands.Length];
 		for ( int i = 0; i < commandBuffers.Length; i++ )
@@ -46,15 +46,16 @@ public sealed unsafe class KaQueue
 			commandBuffers[i] = commands[i].VkCmdBuf;
 		}
 
+		PipelineStageFlags stageFlags = waitStage ?? PipelineStageFlags.None;
 		VkSemaphore waitSemaphoreValue = new( 0 );
 		VkSemaphore signalSemaphoreValue = new( 0 );
 		SubmitInfo submitInfo = new()
 		{
 			SType = StructureType.SubmitInfo,
-			PWaitDstStageMask = &waitStage,
+			PWaitDstStageMask = waitStage is not null ? &stageFlags : null,
 			WaitSemaphoreCount = waitSemaphore is not null ? 1U : 0U,
 			SignalSemaphoreCount = signalSemaphore is not null ? 1U : 0U,
-			CommandBufferCount = 1,
+			CommandBufferCount = (uint)commandBuffers.Length,
 			PCommandBuffers = (VkCommandBuffer*)Unsafe.AsPointer( ref commandBuffers[0] )
 		};
 
