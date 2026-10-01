@@ -37,8 +37,8 @@ public sealed unsafe class SwapchainRenderTarget : IDisposable, IRenderTarget
 	private Extent2D mSwapchainExtent;
 	private VkImage[] mSwapchainImages = [];
 	private VkImageView[] mSwapchainImageViews = [];
-	private VkSemaphore[] mPresentCompleteSemaphores = [];
-	private VkSemaphore[] mRenderFinishedSemaphores = [];
+	private KaSemaphore[] mPresentCompleteSemaphores = [];
+	private KaSemaphore[] mRenderFinishedSemaphores = [];
 	private VkFence[] mInFlightFences = [];
 	private int mFrameIndex;
 	private int mImageIndex;
@@ -224,7 +224,7 @@ public sealed unsafe class SwapchainRenderTarget : IDisposable, IRenderTarget
 
 		VkResult result = mSwapchain.AcquireNextImage(
 			ulong.MaxValue,
-			mPresentCompleteSemaphores[mFrameIndex],
+			mPresentCompleteSemaphores[mFrameIndex].VkSemaphore,
 			out mImageIndex
 		);
 
@@ -264,8 +264,8 @@ public sealed unsafe class SwapchainRenderTarget : IDisposable, IRenderTarget
 	{
 		presentQueue.Submit(
 			commandBuffer: cb,
-			waitSemaphore: mPresentCompleteSemaphores[mFrameIndex],
-			signalSemaphore: mRenderFinishedSemaphores[mImageIndex],
+			waitSemaphore: mPresentCompleteSemaphores[mFrameIndex].VkSemaphore,
+			signalSemaphore: mRenderFinishedSemaphores[mImageIndex].VkSemaphore,
 			fence: mInFlightFences[mFrameIndex],
 			waitStage: PipelineStageFlags.ColorAttachmentOutputBit
 		);
@@ -273,7 +273,7 @@ public sealed unsafe class SwapchainRenderTarget : IDisposable, IRenderTarget
 
 	internal Result Present( KaQueue presentQueue )
 	{
-		VkResult result = presentQueue.Present( mRenderFinishedSemaphores[mImageIndex], mSwapchain, mImageIndex );
+		VkResult result = presentQueue.Present( mRenderFinishedSemaphores[mImageIndex].VkSemaphore, mSwapchain, mImageIndex );
 
 		if ( result is VkResult.SuboptimalKhr or VkResult.ErrorOutOfDateKhr || mFramebufferResized )
 		{
@@ -440,23 +440,23 @@ public sealed unsafe class SwapchainRenderTarget : IDisposable, IRenderTarget
 	{
 		if ( mRenderFinishedSemaphores.Length != mSwapchainImages.Length )
 		{
-			mRenderFinishedSemaphores = new VkSemaphore[mSwapchainImages.Length];
+			mRenderFinishedSemaphores = new KaSemaphore[mSwapchainImages.Length];
 		}
 
 		if ( mPresentCompleteSemaphores.Length != FramesInFlight )
 		{
-			mPresentCompleteSemaphores = new VkSemaphore[FramesInFlight];
+			mPresentCompleteSemaphores = new KaSemaphore[FramesInFlight];
 			mInFlightFences = new VkFence[FramesInFlight];
 		}
 
 		for ( int i = 0; i < mSwapchainImages.Length; i++ )
 		{
-			mRenderFinishedSemaphores[i] = Device.CreateSemaphore();
+			mRenderFinishedSemaphores[i] = KaSemaphore.Create( Device );
 		}
 
 		for ( int i = 0; i < FramesInFlight; i++ )
 		{
-			mPresentCompleteSemaphores[i] = Device.CreateSemaphore();
+			mPresentCompleteSemaphores[i] = KaSemaphore.Create( Device );
 			mInFlightFences[i] = Device.CreateFence( FenceCreateFlags.SignaledBit );
 		}
 	}
@@ -465,16 +465,14 @@ public sealed unsafe class SwapchainRenderTarget : IDisposable, IRenderTarget
 	{
 		mSwapchain.Dispose();
 
-		foreach ( VkSemaphore renderFinishedSemaphore in mRenderFinishedSemaphores )
+		foreach ( KaSemaphore renderFinishedSemaphore in mRenderFinishedSemaphores )
 		{
-			// TODO: Wrap semaphore destruction
-			Vulkan.Vk.DestroySemaphore( Device.VkDevice, renderFinishedSemaphore, null );
+			renderFinishedSemaphore.Dispose();
 		}
 
-		foreach ( VkSemaphore presentCompleteSemaphore in mPresentCompleteSemaphores )
+		foreach ( KaSemaphore presentCompleteSemaphore in mPresentCompleteSemaphores )
 		{
-			// TODO: Wrap semaphore destruction
-			Vulkan.Vk.DestroySemaphore( Device.VkDevice, presentCompleteSemaphore, null );
+			presentCompleteSemaphore.Dispose();
 		}
 
 		foreach ( VkFence fence in mInFlightFences )
