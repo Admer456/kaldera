@@ -60,6 +60,31 @@ public sealed unsafe class KaDevice : IDisposable
 		{
 			switch ( extension )
 			{
+				case DeviceExtensionNames.KhrExternalMemoryWin32:
+					Vulkan.Vk.TryGetDeviceExtension( instance.VkInstance, device, out KhrExternalMemoryWin32 extMemWin32 );
+					Vulkan.ExternalMemoryWin32 = extMemWin32;
+					break;
+
+				case DeviceExtensionNames.KhrExternalSemaphoreWin32:
+					Vulkan.Vk.TryGetDeviceExtension( instance.VkInstance, device, out KhrExternalSemaphoreWin32 extSemWin32 );
+					Vulkan.ExternalSemaphoreWin32 = extSemWin32;
+					break;
+
+				case DeviceExtensionNames.KhrExternalMemoryFd:
+					Vulkan.Vk.TryGetDeviceExtension( instance.VkInstance, device, out KhrExternalMemoryFd extMemFd );
+					Vulkan.ExternalMemoryFd = extMemFd;
+					break;
+
+				case DeviceExtensionNames.KhrExternalSemaphoreFd:
+					Vulkan.Vk.TryGetDeviceExtension( instance.VkInstance, device, out KhrExternalSemaphoreFd extSemFd );
+					Vulkan.ExternalSemaphoreFd = extSemFd;
+					break;
+
+				case DeviceExtensionNames.ExtMetalObjects:
+					Vulkan.Vk.TryGetDeviceExtension( instance.VkInstance, device, out ExtMetalObjects metalObjects );
+					Vulkan.MetalObjects = metalObjects;
+					break;
+
 				case DeviceExtensionNames.KhrSwapchain:
 					Vulkan.Vk.TryGetDeviceExtension( instance.VkInstance, device, out KhrSwapchain swampchain );
 					Vulkan.Swapchain = swampchain;
