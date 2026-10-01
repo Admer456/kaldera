@@ -4,14 +4,10 @@
 using System.Numerics;
 using ExampleBase;
 using Kaldera;
-using Kaldera.Abstractions;
 using Kaldera.Abstractions.Extensions;
-using Kaldera.Abstractions.Memory;
 using Kaldera.Abstractions.RenderTargets;
-using Kaldera.Extensions;
 using Kaldera.Interfaces;
 using Kaldera.Objects;
-using SDL3;
 
 ExampleStartup.Run( "Kaldera Example - Hello screen!", 1600, 900, new ExampleHelloScreen(), args );
 
