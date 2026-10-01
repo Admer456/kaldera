@@ -185,9 +185,9 @@ public class UploadHelper : IDisposable
 			_ => texture.CurrentLayout
 		};
 
-		CommandBuffer.TransitionTextureLayout( ref texture, ImageLayout.TransferDstOptimal );
+		CommandBuffer.Barrier().Transition( ref texture, ImageLayout.TransferDstOptimal );
 		WriteTexture( texture, 0, data );
-		CommandBuffer.TransitionTextureLayout( ref texture, layoutAfterUpdate.Value );
+		CommandBuffer.Barrier().Transition( ref texture, layoutAfterUpdate.Value );
 	}
 
 	public void UpdateTextureArray<T>( ref TextureArray<T> textureArray, Span<byte> data, int layer, ImageLayout? layoutAfterUpdate = null )
@@ -203,12 +203,12 @@ public class UploadHelper : IDisposable
 			_ => textureArray.CurrentLayout
 		};
 
-		CommandBuffer.TransitionTextureLayout( ref textureArray, ImageLayout.TransferDstOptimal );
+		CommandBuffer.Barrier().Transition( ref textureArray, ImageLayout.TransferDstOptimal );
 		for ( int i = baseLayer; i < baseLayer + layers; i++ )
 		{
 			WriteTexture( textureArray, i, data );
 		}
-		CommandBuffer.TransitionTextureLayout( ref textureArray, layoutAfterUpdate.Value );
+		CommandBuffer.Barrier().Transition( ref textureArray, layoutAfterUpdate.Value );
 	}
 
 	public Result<Texture> CommitTexture( Span<byte> pixelData, Format textureFormat, int width, int height, int mips )

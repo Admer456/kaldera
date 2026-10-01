@@ -272,18 +272,18 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 		bool stencil = depth && DepthStencilAttachments!.Value.AspectFlags.HasFlag( ImageAspectFlags.StencilBit );
 		ImageLayout depthLayout = stencil ? ImageLayout.DepthStencilAttachmentOptimal : ImageLayout.DepthAttachmentOptimal;
 
-		commands.TransitionTextureLayout( ref ColourAttachments.Value, ImageLayout.ColorAttachmentOptimal );
+		commands.Barrier().Transition( ref ColourAttachments.Value, ImageLayout.ColorAttachmentOptimal );
 		if ( depth )
 		{
-			commands.TransitionTextureLayout( ref DepthStencilAttachments!.Value, depthLayout );
+			commands.Barrier().Transition( ref DepthStencilAttachments!.Value, depthLayout );
 		}
 
 		if ( msaa )
 		{
-			commands.TransitionTextureLayout( ref ColourAttachmentsMsaa!.Value, ImageLayout.ColorAttachmentOptimal );
+			commands.Barrier().Transition( ref ColourAttachmentsMsaa!.Value, ImageLayout.ColorAttachmentOptimal );
 			if ( depth )
 			{
-				commands.TransitionTextureLayout( ref DepthStencilAttachmentsMsaa!.Value, depthLayout );
+				commands.Barrier().Transition( ref DepthStencilAttachmentsMsaa!.Value, depthLayout );
 			}
 		}
 
@@ -338,10 +338,10 @@ public class TextureRenderTarget : IDisposable, IRenderTarget
 	public void EndRenderPass( KaCommandBuffer commands )
 	{
 		commands.EndRendering();
-		commands.TransitionTextureLayout( ref ColourAttachments.Value, ImageLayout.ReadOnlyOptimal );
+		commands.Barrier().Transition( ref ColourAttachments.Value, ImageLayout.ReadOnlyOptimal );
 		if ( DepthStencilAttachments is not null )
 		{
-			commands.TransitionTextureLayout( ref DepthStencilAttachments.Value, ImageLayout.ReadOnlyOptimal );
+			commands.Barrier().Transition( ref DepthStencilAttachments.Value, ImageLayout.ReadOnlyOptimal );
 		}
 	}
 
