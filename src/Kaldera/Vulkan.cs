@@ -38,6 +38,11 @@ public static partial class Vulkan
 	{
 		uint propertyCount = 0;
 		Vk.EnumerateInstanceLayerProperties( ref propertyCount, null );
+		if ( propertyCount == 0 )
+		{
+			return [];
+		}
+
 		LayerProperties[] result = new LayerProperties[propertyCount];
 		Vk.EnumerateInstanceLayerProperties( ref propertyCount, result.AsPointer() );
 
