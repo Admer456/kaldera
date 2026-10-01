@@ -22,6 +22,12 @@ public readonly struct Result<T>
 		mError = error;
 	}
 
+	public Result( T value )
+	{
+		mValue = value;
+		mError = null;
+	}
+
 	public bool Get( [NotNullWhen( false )] out Error? error, [NotNullWhen( true )] out T? value )
 	{
 		if ( mError is not null )
