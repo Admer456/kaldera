@@ -7,6 +7,8 @@ namespace Kaldera;
 
 public record Error( string Message, Error? Inner = null )
 {
+	public static Error NotImplemented => new Error( "Not implemented" );
+
 	public Error Prepend( string message )
 		=> new( message, this );
 }
