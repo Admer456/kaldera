@@ -9,7 +9,7 @@ namespace Kaldera.Abstractions.Memory;
 /// <summary>
 /// Allocates naively. For each new buffer/image, a new block of device memory is allocated.
 /// Not recommended for production. Consider VMA instead.
-/// If you rely on this a lot, you will likely run out of allocations.
+/// If you rely on this, you will likely run out of allocations.
 /// </summary>
 public unsafe class SimpleAllocator : IResourceAllocator
 {

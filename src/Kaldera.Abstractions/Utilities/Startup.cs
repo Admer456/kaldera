@@ -77,7 +77,7 @@ public static class Startup
 		return result.ToArray();
 	}
 
-	public static StructureChain	GetDesiredDeviceFeatures()
+	public static StructureChain GetDesiredDeviceFeatures()
 		=> StructureChain.Begin( new PhysicalDeviceFeatures2
 			{
 				Features = new()

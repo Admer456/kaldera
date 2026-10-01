@@ -24,8 +24,8 @@ public struct ImageOptions
 			Flags = ImageCreateFlags.None,
 			ImageType = (width, height, depth) switch
 			{
-				(_,1,1) => ImageType.Type1D,
-				(_,_,1) => ImageType.Type2D,
+				(_, 1, 1) => ImageType.Type1D,
+				(_, _, 1) => ImageType.Type2D,
 				_ => ImageType.Type3D,
 			},
 			Format = format,

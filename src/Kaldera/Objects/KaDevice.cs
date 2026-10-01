@@ -148,13 +148,13 @@ public sealed unsafe class KaDevice : IDisposable
 	}
 
 	public VkResult WaitForFences( VkFence fence, bool waitAll, ulong timeoutMs )
-		=> WaitForFences( [ fence ], waitAll, timeoutMs );
+		=> WaitForFences( [fence], waitAll, timeoutMs );
 
 	public VkResult WaitForFences( Span<VkFence> fences, bool waitAll, ulong timeoutMs )
 		=> Vulkan.Vk.WaitForFences( VkDevice, fences, waitAll, timeoutMs );
 
 	public VkResult ResetFences( VkFence fence )
-		=> ResetFences( [ fence ] );
+		=> ResetFences( [fence] );
 
 	public VkResult ResetFences( Span<VkFence> fences )
 		=> Vulkan.Vk.ResetFences( VkDevice, fences );
