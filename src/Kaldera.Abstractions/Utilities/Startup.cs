@@ -10,6 +10,7 @@ namespace Kaldera.Abstractions.Utilities;
 public class StartupOptions
 {
 	public delegate Result<KaPhysicalDevice> DeviceSelector( KaInstance instance, string[]? deviceExtensions = null, StructureChain? features = null );
+
 	public delegate void FeatureModifier( StructureChain features );
 
 	public required string ApplicationName { get; set; }
@@ -71,7 +72,27 @@ public static class Startup
 		// implementation and a fully-conformant native Vulkan implementation."
 		if ( Environment.OSVersion.Platform is PlatformID.MacOSX )
 		{
-			result.Add( DeviceExtensionNames.KhrPortabilitySubset );
+			result.AddRange( [
+				DeviceExtensionNames.KhrPortabilitySubset,
+				DeviceExtensionNames.ExtMetalObjects
+			] );
+		}
+		else if ( Environment.OSVersion.Platform is PlatformID.Win32NT )
+		{
+			// Enables shared/exportable images. Refer to KaImage.Export
+			result.AddRange( [
+				// KhrExternalMemory etc. are part of VK 1.1,
+				// but you still need platform-specific extensions
+				DeviceExtensionNames.KhrExternalMemoryWin32,
+				DeviceExtensionNames.KhrExternalSemaphoreWin32
+			] );
+		}
+		else if ( Environment.OSVersion.Platform is PlatformID.Unix )
+		{
+			result.AddRange( [
+				DeviceExtensionNames.KhrExternalMemoryFd,
+				DeviceExtensionNames.KhrExternalSemaphoreFd
+			] );
 		}
 
 		return result.ToArray();
